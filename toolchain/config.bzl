@@ -278,6 +278,7 @@ def _impl(ctx):
 
     linker_param_file_feature = feature(
         name = "linker_param_file",
+        enabled = True,
         flag_sets = [
             flag_set(
                 actions = [
@@ -300,10 +301,12 @@ def _impl(ctx):
         name = "compiler_param_file",
         # For standard GCC, Bazel handles the flag formatting automatically 
         # when you just declare the feature name.
+        enabled = True
     )
 
     archiver_param_file_feature = feature(
         name = "archiver_param_file",
+        enabled = True
     )
 
     return cc_common.create_cc_toolchain_config_info(
