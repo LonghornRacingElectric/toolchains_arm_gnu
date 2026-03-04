@@ -196,7 +196,7 @@ def %toolchain_name%_toolchain(
                 linker_files = ":{}_{}_all_linker_files".format(variant.name, host_repo),
                 objcopy_files = "{}:objcopy".format(alias_repo),
                 strip_files = "{}:strip".format(alias_repo),
-                supports_param_files = 0,
+                supports_param_files = 1,
                 toolchain_config = ":config_{}_{}".format(variant.name, host_repo),
                 toolchain_identifier = host_repo,
                 exec_transition_for_inputs = False,

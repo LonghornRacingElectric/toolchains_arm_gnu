@@ -115,7 +115,7 @@ def _arm_gnu_toolchain(
             linker_files = "@{}_{}//:linker_files".format(toolchain, host),
             objcopy_files = "@{}_{}//:objcopy".format(toolchain, host),
             strip_files = "@{}_{}//:strip".format(toolchain, host),
-            supports_param_files = 0,
+            supports_param_files = 1,
             toolchain_config = ":config_{}_{}".format(host, name),
             toolchain_identifier = "{}_{}_{}".format(toolchain, host, name),
         )
