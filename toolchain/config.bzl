@@ -95,13 +95,21 @@ def _impl(ctx):
             ACTION_NAMES.preprocess_assemble,
             ACTION_NAMES.c_compile,
             ACTION_NAMES.cc_flags_make_variable,
-            ACTION_NAMES.cpp_link_executable,
-            ACTION_NAMES.cpp_link_dynamic_library,
-            ACTION_NAMES.cpp_link_nodeps_dynamic_library,
             ACTION_NAMES.cpp_compile,
             ACTION_NAMES.cpp_header_parsing,
         ],
         ctx.attr.gcc_tool,
+    )
+
+    action_configs += _action_configs(
+        ctx,
+        [
+            ACTION_NAMES.cpp_link_executable,
+            ACTION_NAMES.cpp_link_dynamic_library,
+            ACTION_NAMES.cpp_link_nodeps_dynamic_library,
+        ],
+        ctx.attr.gcc_tool,
+        implies = ["linker_param_file"],
     )
 
     action_configs += _action_configs(
@@ -121,6 +129,45 @@ def _impl(ctx):
         ctx,
         [ACTION_NAMES.strip],
         "strip",
+    )
+
+    # Feature to support param files for linker actions.
+    # When command lines exceed the OS limit (e.g. Windows CreateProcessW ~32K),
+    # Bazel writes arguments to a file and passes @file to the tool.
+    linker_param_file_feature = feature(
+        name = "linker_param_file",
+        flag_sets = [
+            flag_set(
+                actions = [
+                    ACTION_NAMES.cpp_link_executable,
+                    ACTION_NAMES.cpp_link_dynamic_library,
+                    ACTION_NAMES.cpp_link_nodeps_dynamic_library,
+                    ACTION_NAMES.cpp_link_static_library,
+                ],
+                flag_groups = [
+                    flag_group(
+                        flags = ["@%{linker_param_file}"],
+                        expand_if_available = "linker_param_file",
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    # Feature to support param files for compiler actions.
+    compiler_param_file_feature = feature(
+        name = "compiler_param_file",
+        flag_sets = [
+            flag_set(
+                actions = _all_compile_actions,
+                flag_groups = [
+                    flag_group(
+                        flags = ["@%{compiler_param_file}"],
+                        expand_if_available = "compiler_param_file",
+                    ),
+                ],
+            ),
+        ],
     )
 
     dbg_feature = feature(
@@ -281,6 +328,8 @@ def _impl(ctx):
             for include in ctx.files.include_path
         ],
         features = [
+            linker_param_file_feature,
+            compiler_param_file_feature,
             dbg_feature,
             opt_feature,
             fastbuild_feature,
