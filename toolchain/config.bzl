@@ -108,7 +108,7 @@ def _impl(ctx):
         ctx,
         [ACTION_NAMES.cpp_link_static_library],
         "ar",
-        implies = ["archiver_flags", "linker_param_file"],
+        implies = ["archiver_flags", "archiver_param_file"],
     )
 
     action_configs += _action_configs(
@@ -265,6 +265,36 @@ def _impl(ctx):
         ],
     )
 
+    linker_param_file_feature = feature(
+        name = "linker_param_file",
+        flag_sets = [
+            flag_set(
+                actions = [
+                    ACTION_NAMES.cpp_link_executable,
+                    ACTION_NAMES.cpp_link_dynamic_library,
+                    ACTION_NAMES.cpp_link_nodeps_dynamic_library,
+                ],
+                flag_groups = [
+                    flag_group(
+                        expand_if_available = "linker_param_file",
+                        # GCC natively understands the @ prefix for param files
+                        flags = ["@%{linker_param_file}"],
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    compiler_param_file_feature = feature(
+        name = "compiler_param_file",
+        # For standard GCC, Bazel handles the flag formatting automatically 
+        # when you just declare the feature name.
+    )
+
+    archiver_param_file_feature = feature(
+        name = "archiver_param_file",
+    )
+
     return cc_common.create_cc_toolchain_config_info(
         ctx = ctx,
         toolchain_identifier = ctx.attr.toolchain_identifier,
@@ -291,6 +321,9 @@ def _impl(ctx):
             toolchain_linker_flags,
             additional_link_libraries,
             custom_linkopts,
+            linker_param_file_feature,
+            compiler_param_file_feature,
+            archiver_param_file_feature,
         ],
     )
 
