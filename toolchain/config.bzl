@@ -88,6 +88,7 @@ def _impl(ctx):
     default_linker_flags = _default_linker_flags(ctx)
     action_configs = []
 
+    # 1. Compile Actions (uses compiler_param_file)
     action_configs += _action_configs(
         ctx,
         [
@@ -95,13 +96,23 @@ def _impl(ctx):
             ACTION_NAMES.preprocess_assemble,
             ACTION_NAMES.c_compile,
             ACTION_NAMES.cc_flags_make_variable,
-            ACTION_NAMES.cpp_link_executable,
-            ACTION_NAMES.cpp_link_dynamic_library,
-            ACTION_NAMES.cpp_link_nodeps_dynamic_library,
             ACTION_NAMES.cpp_compile,
             ACTION_NAMES.cpp_header_parsing,
         ],
         ctx.attr.gcc_tool,
+        implies = ["compiler_param_file"],
+    )
+
+    # 2. Link Actions (uses linker_param_file)
+    action_configs += _action_configs(
+        ctx,
+        [
+            ACTION_NAMES.cpp_link_executable,
+            ACTION_NAMES.cpp_link_dynamic_library,
+            ACTION_NAMES.cpp_link_nodeps_dynamic_library,
+        ],
+        ctx.attr.gcc_tool,
+        implies = ["linker_param_file"],
     )
 
     action_configs += _action_configs(
