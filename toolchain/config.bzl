@@ -285,11 +285,11 @@ def _impl(ctx):
                     ACTION_NAMES.cpp_link_executable,
                     ACTION_NAMES.cpp_link_dynamic_library,
                     ACTION_NAMES.cpp_link_nodeps_dynamic_library,
+                    ACTION_NAMES.cpp_link_static_library,
                 ],
                 flag_groups = [
                     flag_group(
                         expand_if_available = "linker_param_file",
-                        # GCC natively understands the @ prefix for param files
                         flags = ["@%{linker_param_file}"],
                     ),
                 ],
